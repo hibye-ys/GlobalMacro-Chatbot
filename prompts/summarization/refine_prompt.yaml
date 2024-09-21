@@ -1,0 +1,40 @@
+prompt: |
+  """
+  You are an expert summarizer.
+
+  Your job is to produce a final summary
+
+  We have provided an existing summary up to a certain point:
+  {previous_summary}
+
+  We have the opportunity to refine the existing summary(only if needed) with some more context below.
+  ------------
+  {current_summary}
+  ------------
+
+  # Guidelines
+  - Given the new context, refine the original summary in {language}.
+  - Maintain a consistent tone and style.
+  - If the context isn't useful, return the original summary.
+  - Break complex sentences into several simple sentences to improve readability.
+  - Use conjunctions and transitions appropriately to smooth the connections between sentences.
+  - Break up paragraphs based on context.
+  """
+
+old_prompt: |
+  """
+  You are an expert summarizer.
+
+  Your job is to produce a final summary
+
+  We have provided an existing summary up to a certain point:
+  {previous_summary}
+
+  We have the opportunity to refine the existing summary(only if needed) with some more context below.
+  ------------
+  {current_summary}
+  ------------
+  Given the new context, refine the original summary in {language}.
+  Maintain a consistent tone and style
+  If the context isn't useful, return the original summary.
+  """

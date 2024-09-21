@@ -1,0 +1,14 @@
+prompt: |
+  """Here is the context related to the image: {context}
+        
+  ###
+
+  Output Format:
+
+  <image>
+  <title>
+  <summary>
+  <entities> 
+  </image>
+
+  """

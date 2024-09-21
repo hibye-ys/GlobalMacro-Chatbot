@@ -1,0 +1,219 @@
+prompt: |
+  """
+  As an expert copy-writer, you will write increasingly concise, entity-dense summaries of the user provided {content_category} written by KOREAN. The initial summary should be under {max_words} words and contain {entity_range} informative Descriptive Entities from the {content_category}.
+
+  A Descriptive Entity is:
+  - Relevant: to the main story.
+  - Specific: descriptive yet concise (10 words or fewer).
+  - Faithful: present in the {content_category}.
+  - Anywhere: located anywhere in the {content_category}.
+
+  # Your Summarization Process
+  - Read through the {content_category} and the all the below sections to get an understanding of the task.
+  - Pick {entity_range} informative Descriptive Entities from the {content_category} (";" delimited, do not add spaces).
+  - In your output JSON list of dictionaries, write an initial summary of max {max_words} words containing the Entities.
+  - You now have `[{{"missing_entities": "...", "denser_summary": "..."}}]`
+
+  Then, repeat the below 2 steps {iterations} times:
+
+  - Step 1. In a new dict in the same list, identify {entity_range} new informative Descriptive Entities from the {content_category} which are missing from the previously generated summary.
+  - Step 2. Write a new, denser summary of identical length which covers every Entity and detail from the previous summary plus the new Missing Entities.
+
+  A Missing Entity is:
+  - An informative Descriptive Entity from the {content_category} as defined above.
+  - Novel: not in the previous summary.
+
+  # Guidelines
+  - The first summary should be long (max {max_words} words) yet highly non-specific, containing little information beyond the Entities marked as missing. Use overly verbose language and fillers (e.g., "this {content_category} discusses") to reach ~{max_words} words.
+  - Make every word count: re-write the previous summary to improve flow and make space for additional entities.
+  - Make space with fusion, compression, and removal of uninformative phrases like "the {content_category} discusses".
+  - The summaries should become highly dense and concise yet self-contained, e.g., easily understood without the {content_category}.
+  - Missing entities can appear anywhere in the new summary.
+  - Never drop entities from the previous summary. If space cannot be made, add fewer new entities.
+  - You're finished when your JSON list has 1+{iterations} dictionaries of increasing density.
+
+  # IMPORTANT
+  - Remember, to keep each summary to max {max_words} words.
+  - Never remove Entities or details. Only add more from the {content_category}.
+  - Do not discuss the {content_category} itself, focus on the content: informative Descriptive Entities, and details.
+  - Remember, if you're overusing filler phrases in later summaries, or discussing the {content_category} itself, not its contents, choose more informative Descriptive Entities and include more details from the {content_category}.
+  - Answer with a minified JSON list of dictionaries with keys "missing_entities" and "denser_summary".
+  - "denser_summary" should be written in the same language as the "content".
+  - Use only KOREAN language to reply.
+
+  ## Example output
+  [{{"missing_entities": "ent1;ent2", "denser_summary": "<vague initial summary with entities 'ent1','ent2'>"}}, {{"missing_entities": "ent3", "denser_summary": "denser summary with 'ent1','ent2','ent3'"}}, ...]
+
+
+  {content_category}:
+  {content}
+  """
+
+knowledge_graph_prompt: |
+  """
+  전문 카피라이터로서, 사용자가 제공한 {content_category}에 대해 점점 더 간결하고 엔티티가 밀집된 요약을 한국어로 작성합니다. 초기 요약은 {max_words}단어 이하여야 하며 {content_category}에서 {entity_range}개의 유익한 설명 엔티티를 포함해야 합니다.
+
+  설명 엔티티의 정의:
+  - 관련성: 주요 이야기와 관련이 있어야 함.
+  - 구체성: 설명적이지만 간결해야 함 (10단어 이하).
+  - 충실성: {content_category}에 실제로 존재해야 함.
+  - 위치: {content_category} 어디에나 위치할 수 있음.
+
+  ## 초기 요약 프로세스
+  1. {content_category}와 모든 섹션을 읽고 과제를 이해합니다.
+  2. {content_category}에서 {entity_range}개의 유익한 설명 엔티티를 선택합니다 (";" 로 구분, 공백 추가 없이).
+  3. JSON 딕셔너리 리스트에 초기 요약을 작성합니다 (최대 {max_words}단어, 선택한 엔티티 포함).
+  4. 이제 `[{{"missing_entities": "...", "denser_summary": "..."}}]` 형태가 됩니다.
+
+  ## 반복 요약 프로세스
+  그 다음, 아래 단계를 {iterations}번 반복합니다:
+
+  1. Knowledge Graph 생성:
+    - 노드: 모든 엔티티 (이전 요약과 새로 식별된 엔티티 모두)
+    - 엣지: 엔티티 간 잠재적 관계
+
+  2. Knowledge Graph 분석:
+    - 중심 노드 (많은 연결을 가진 엔티티) 식별
+    - 밀접하게 관련된 엔티티들의 클러스터나 커뮤니티 감지
+    - 엔티티 간 연결의 강도와 성격 조사
+
+  3. Knowledge Graph 분석을 바탕으로:
+    - 상호 연결에서 드러나는 주요 주제나 개념 식별
+    - 전체 내용 이해에 가장 중요한 엔티티 결정
+    - 엔티티 간 예상치 못했거나 명확하지 않은 관계 인식
+
+  4. 새로운 딕셔너리에 {content_category}에서 이전 요약에 없는 {entity_range}개의 새로운 유익한 설명 엔티티를 식별합니다.
+
+  5. 동일한 길이의 새롭고 더 밀도 높은 요약을 작성합니다:
+    - 이전 요약의 모든 엔티티와 세부 사항 포함
+    - 새로 식별된 누락 엔티티 통합
+    - Knowledge Graph 분석에서 식별된 주요 주제와 중요 엔티티 강조
+    - 엔티티 간 중요한 상호 연결이나 관계 강조
+
+  6. Knowledge Graph 반영:
+    - 새 엔티티 추가로 그래프 구조가 어떻게 변했는지 고려
+    - 더 중요해지거나 덜 중요해진 엔티티가 있는지 확인
+    - 새로운 중요한 클러스터나 주제가 등장했는지 검토
+
+  ## 지침
+  - 첫 요약은 길어야 하며 (최대 {max_words}단어) 매우 구체적이지 않아야 합니다. 누락된 것으로 표시된 엔티티 외에는 정보가 거의 없어야 합니다. 과도하게 장황한 언어와 채움말 (예: "이 {content_category}는 다룹니다")을 사용하여 약 {max_words}단어에 도달하세요.
+  - 모든 단어를 의미 있게 사용하세요: 이전 요약을 다시 작성하여 흐름을 개선하고 추가 엔티티를 위한 공간을 만드세요.
+  - 융합, 압축, "{content_category}는 다룹니다"와 같은 정보가 없는 구문 제거로 공간을 확보하세요.
+  - 요약은 매우 밀도 높고 간결하면서도 자체적으로 이해 가능해야 합니다 (예: {content_category} 없이도 쉽게 이해될 수 있어야 함).
+  - 누락된 엔티티는 새 요약의 어디에나 나타날 수 있습니다.
+  - 이전 요약의 엔티티를 절대 삭제하지 마세요. 공간이 부족하면 새 엔티티를 덜 추가하세요.
+  - JSON 리스트에 1+{iterations}개의 점점 더 밀도 높은 딕셔너리가 있으면 완료됩니다.
+
+  ## 중요 사항
+  - 각 요약을 최대 {max_words}단어로 유지하는 것을 잊지 마세요.
+  - 엔티티나 세부 사항을 절대 제거하지 마세요. {content_category}에서 더 많은 정보만 추가하세요.
+  - {content_category} 자체에 대해 논하지 말고, 내용에 집중하세요: 유익한 설명 엔티티와 세부 사항에 초점을 맞추세요.
+  - 후반 요약에서 채움말을 과도하게 사용하거나 {content_category} 자체를 논하고 있다면, 더 유익한 설명 엔티티를 선택하고 {content_category}의 세부 사항을 더 많이 포함하세요.
+  - "missing_entities"와 "denser_summary" 키를 가진 딕셔너리의 JSON 리스트로 최소화하여 답변하세요.
+  - "denser_summary"는 "content"와 같은 언어로 작성되어야 합니다.
+  - 답변에는 한국어만 사용하세요.
+
+  ## 출력 예시
+  [{{"missing_entities": "엔티티1;엔티티2", "denser_summary": "<'엔티티1','엔티티2'를 포함한 모호한 초기 요약>"}}, {{"missing_entities": "엔티티3", "denser_summary": "'엔티티1','엔티티2','엔티티3'을 포함한 더 밀도 높은 요약"}}, ...]
+
+  {content_category}:
+  {content}
+  """
+
+knowledge_graph_prompt2: |
+  """
+  전문 카피라이터로서, 사용자가 제공한 {content_category}에 대해 점점 더 간결하고 엔티티가 밀집된 요약을 한국어로 작성합니다. 또한 이 내용을 분석하는 것이 아니라 당신이 쓴것처럼 이야기해주세요.
+  초기 요약은 {max_words}단어 이하여야 하며 {content_category}에서 {entity_range}개의 유익한 설명 엔티티를 포함해야 합니다.
+
+  설명 엔티티의 정의:
+  - 관련성: 주요 이야기와 관련이 있어야 함.
+  - 구체성: 설명적이지만 간결해야 함 (10단어 이하).
+  - 충실성: {content_category}에 실제로 존재해야 함.
+  - 위치: {content_category} 어디에나 위치할 수 있음.
+
+  ## 초기 요약 프로세스
+  1. {content_category}와 모든 섹션을 읽고 과제를 이해합니다.
+  2. {content_category}에서 {entity_range}개의 유익한 설명 엔티티를 선택합니다 (";" 로 구분, 공백 추가 없이).
+  3. JSON 딕셔너리 리스트에 초기 요약을 작성합니다 (최대 {max_words}단어, 선택한 엔티티 포함).
+  4. 이제 `[{{"missing_entities": "...", "denser_summary": "..."}}]` 형태가 됩니다.
+
+  ## 반복 요약 프로세스
+  그 다음, 아래 단계를 {iterations}번 반복합니다:
+
+  1. Knowledge Graph 생성:
+    - 노드: 모든 엔티티 (이전 요약과 새로 식별된 엔티티 모두)
+    - 엣지: 엔티티 간 잠재적 관계
+
+  2. Knowledge Graph 분석:
+    - 중심 노드 (많은 연결을 가진 엔티티) 식별
+    - 밀접하게 관련된 엔티티들의 클러스터나 커뮤니티 감지
+    - 엔티티 간 연결의 강도와 성격 조사
+
+  3. Knowledge Graph 분석을 바탕으로:
+    - 상호 연결에서 드러나는 주요 주제나 개념 식별
+    - 전체 내용 이해에 가장 중요한 엔티티 결정
+    - 엔티티 간 예상치 못했거나 명확하지 않은 관계 인식
+
+  4. 새로운 딕셔너리에 {content_category}에서 이전 요약에 없는 {entity_range}개의 새로운 유익한 설명 엔티티를 식별합니다.
+
+  5. 동일한 길이의 새롭고 더 밀도 높은 요약을 작성합니다:
+    - 이전 요약의 모든 엔티티와 세부 사항 포함
+    - 새로 식별된 누락 엔티티 통합
+    - Knowledge Graph 분석에서 식별된 주요 주제와 중요 엔티티 강조
+    - 엔티티 간 중요한 상호 연결이나 관계 강조
+
+  6. Knowledge Graph 반영:
+    - 새 엔티티 추가로 그래프 구조가 어떻게 변했는지 고려
+    - 더 중요해지거나 덜 중요해진 엔티티가 있는지 확인
+    - 새로운 중요한 클러스터나 주제가 등장했는지 검토
+
+  ## 지침
+  - 첫 요약은 길어야 하며 (최대 {max_words}단어) 매우 구체적이지 않아야 합니다. 누락된 것으로 표시된 엔티티 외에는 정보가 거의 없어야 합니다. 과도하게 장황한 언어와 채움말 (예: "이 {content_category}는 다룹니다")을 사용하여 약 {max_words}단어에 도달하세요.
+  - 모든 단어를 의미 있게 사용하세요: 이전 요약을 다시 작성하여 흐름을 개선하고 추가 엔티티를 위한 공간을 만드세요.
+  - 융합, 압축, "{content_category}는 다룹니다"와 같은 정보가 없는 구문 제거로 공간을 확보하세요.
+  - 요약은 매우 밀도 높고 간결하면서도 자체적으로 이해 가능해야 합니다 (예: {content_category} 없이도 쉽게 이해될 수 있어야 함).
+  - 누락된 엔티티는 새 요약의 어디에나 나타날 수 있습니다.
+  - 이전 요약의 엔티티를 절대 삭제하지 마세요. 공간이 부족하면 새 엔티티를 덜 추가하세요.
+  - JSON 리스트에 1+{iterations}개의 점점 더 밀도 높은 딕셔너리가 있으면 완료됩니다.
+
+  ## 개선된 요약 작성 지침
+  1. 문장 구조 개선:
+    - 각 문장이 명확하고 간결하게 하나의 주요 아이디어를 전달하도록 합니다.
+    - 복잡한 문장은 여러 개의 간단한 문장으로 나누어 가독성을 높입니다.
+    - 접속사와 전환어를 적절히 사용하여 문장 간 연결을 매끄럽게 합니다.
+
+  2. 단락 구성:
+    - 관련된 아이디어나 주제를 하나의 단락으로 묶습니다.
+    - 각 단락은 하나의 중심 주제나 아이디어를 다루도록 합니다.
+    - 단락 간 자연스러운 흐름을 만들어 전체적인 논리 구조를 강화합니다.
+
+  3. 문맥 고려:
+    - Knowledge Graph에서 식별된 주요 주제와 관계를 바탕으로 내용을 구성합니다.
+    - 중요한 엔티티나 개념을 소개할 때 적절한 배경 정보를 제공합니다.
+    - 엔티티 간의 관계를 고려하여 정보를 논리적 순서로 배열합니다.
+
+  4. 요약의 일관성:
+    - 전체 요약에서 일관된 어조와 스타일을 유지합니다.
+    - 시제와 관점을 일관되게 사용합니다.
+    - 전문 용어나 약어를 처음 사용할 때 간단히 설명합니다.
+
+  5. 가독성 향상:
+    - 불필요한 수식어나 반복을 제거하여 간결성을 높입니다.
+    - 능동태를 주로 사용하여 문장을 더 직접적이고 강력하게 만듭니다.
+    - 필요한 경우 글머리 기호나 번호 매기기를 사용하여 정보를 구조화합니다.
+
+  ## 중요 사항
+  - 각 요약을 최대 {max_words}단어로 유지하는 것을 잊지 마세요.
+  - 엔티티나 세부 사항을 절대 제거하지 마세요. {content_category}에서 더 많은 정보만 추가하세요.
+  - {content_category} 자체에 대해 논하지 말고, 내용에 집중하세요: 유익한 설명 엔티티와 세부 사항에 초점을 맞추세요.
+  - 후반 요약에서 채움말을 과도하게 사용하거나 {content_category} 자체를 논하고 있다면, 더 유익한 설명 엔티티를 선택하고 {content_category}의 세부 사항을 더 많이 포함하세요.
+  - "missing_entities"와 "denser_summary" 키를 가진 딕셔너리의 JSON 리스트로 최소화하여 답변하세요.
+  - "denser_summary"는 "content"와 같은 언어로 작성되어야 합니다.
+
+
+  ## 출력 예시
+  [{{"missing_entities": "엔티티1;엔티티2", "denser_summary": "<'엔티티1','엔티티2'를 포함한 모호한 초기 요약>"}}, {{"missing_entities": "엔티티3", "denser_summary": "'엔티티1','엔티티2','엔티티3'을 포함한 더 밀도 높은 요약"}}, ...]
+
+  {content_category}:
+  {content}
+  """

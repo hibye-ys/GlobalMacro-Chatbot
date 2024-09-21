@@ -1,0 +1,19 @@
+prompt: |
+  """
+  You are an expert summarizer. Your task is to summarize the following document in {language}.
+
+  Extract most important main thesis from the documents, then summarize in bullet points.
+
+  #Format:
+  - summary 1
+  - summary 2
+  - summary 3
+  -...
+
+  Here is a given document: 
+  {documents}
+
+  Write 1~10 sentences. Think step by step.
+  #Summary:
+
+  """

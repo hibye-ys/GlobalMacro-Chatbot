@@ -1,0 +1,29 @@
+prompt: |
+  """
+    Please analyze the following text and extract the following details in Korean:
+
+    1. **Keywords**: 
+      - List several important keywords that represent the main topics or themes in the text. 
+      - These should be short and specific.
+      - Only refer to page_content when extracting keywords
+
+    2. **Datetime in metadata**: 
+      - Identify the date in Header 1 of metadata. Provide it in the YYYY-MM-DD format.
+      for example, "Header 1": "[2024.07.23 some texts]" -> "datetime": "2024-07-23".
+      - If Header 2 or Header 3 or Header 4 has a date in metadata, make it that date. Priority is 1.Header 4 2.Header 3  3.Header 2 4.Header 1. 
+      - If the date in the header is MM-DD, convert it to 2024-MM-DD. for example, 7월 22일 -> "2024-07-22"
+
+    3. **Major Events**: 
+      - List any major events mentioned in the text. These should be significant occurrences or actions that are central to the text. Return None if there is no event.
+      - Only refer to page_content when extracting Major Events
+
+      
+    Text: {input_text}
+
+    Output the results as a JSON object in the following format:
+    {
+        "keyword": [...],
+        "datetime": "YYYY-MM-DD",
+        "events": [...]
+    }
+  """
